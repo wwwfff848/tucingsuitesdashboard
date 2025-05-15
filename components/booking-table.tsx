@@ -31,6 +31,12 @@ export function BookingTable({ bookings, onAddBooking, onEditBooking, onDeleteBo
     return true
   })
 
+  // Format currency
+  const formatCurrency = (amount: number | undefined) => {
+    if (amount === undefined) return "-"
+    return `RM ${amount.toFixed(2)}`
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -65,8 +71,10 @@ export function BookingTable({ bookings, onAddBooking, onEditBooking, onDeleteBo
                 <TableHead>Service</TableHead>
                 <TableHead>Cat Name</TableHead>
                 <TableHead>Owner</TableHead>
+                <TableHead>Contact</TableHead>
                 <TableHead>Start Date</TableHead>
                 <TableHead>End Date</TableHead>
+                <TableHead>Total Fees</TableHead>
                 <TableHead>Notes</TableHead>
                 <TableHead className="w-[80px]">Actions</TableHead>
               </TableRow>
@@ -96,8 +104,10 @@ export function BookingTable({ bookings, onAddBooking, onEditBooking, onDeleteBo
                     </TableCell>
                     <TableCell>{booking.catName}</TableCell>
                     <TableCell>{booking.ownerName}</TableCell>
+                    <TableCell>{booking.contactNumber || "-"}</TableCell>
                     <TableCell>{new Date(booking.startDate).toLocaleDateString()}</TableCell>
                     <TableCell>{booking.endDate ? new Date(booking.endDate).toLocaleDateString() : "-"}</TableCell>
+                    <TableCell>{formatCurrency(booking.totalFees)}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{booking.notes || "-"}</TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -126,7 +136,7 @@ export function BookingTable({ bookings, onAddBooking, onEditBooking, onDeleteBo
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     No {activeTab !== "all" ? activeTab : ""} bookings found.
                   </TableCell>
                 </TableRow>

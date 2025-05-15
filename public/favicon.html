@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Orange Circle Favicon Generator</title>
+</head>
+<body>
+  <canvas id="favicon" width="32" height="32"></canvas>
+  <script>
+    // Get the canvas element
+    const canvas = document.getElementById('favicon');
+    const ctx = canvas.getContext('2d');
+    
+    // Draw an orange circle
+    ctx.fillStyle = '#FF9500';
+    ctx.beginPath();
+    ctx.arc(16, 16, 16, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Convert canvas to data URL
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    // Create a link to download the favicon
+    const link = document.createElement('a');
+    link.download = 'favicon.ico';
+    link.href = dataUrl;
+    link.textContent = 'Download Favicon';
+    document.body.appendChild(link);
+    
+    // Auto-click the link to download
+    link.click();
+  </script>
+</body>
+</html>

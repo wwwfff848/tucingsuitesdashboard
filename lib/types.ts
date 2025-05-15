@@ -11,4 +11,6 @@ export interface Booking {
   startDate: string
   endDate?: string
   notes?: string
+  totalFees?: number
+  contactNumber?: string
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useMemo } from "react"
 import { type Booking, ServiceType } from "@/lib/types"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "./ui/button"
@@ -46,6 +46,32 @@ export function BookingCalendar({ bookings, onDateRangeSelect, onDoubleClickDate
     "November",
     "December",
   ]
+
+  // Create a map of bookings by ID for consistent positioning
+  const bookingPositions = useMemo(() => {
+    const positions = new Map<string, number>()
+    let position = 0
+
+    // First assign positions to boarding bookings
+    bookings
+      .filter((booking) => booking.serviceType === ServiceType.Boarding)
+      .forEach((booking) => {
+        if (!positions.has(booking.id)) {
+          positions.set(booking.id, position++)
+        }
+      })
+
+    // Then assign positions to grooming bookings
+    bookings
+      .filter((booking) => booking.serviceType === ServiceType.Grooming)
+      .forEach((booking) => {
+        if (!positions.has(booking.id)) {
+          positions.set(booking.id, position++)
+        }
+      })
+
+    return positions
+  }, [bookings])
 
   // Navigate to previous month
   const prevMonth = () => {
@@ -107,7 +133,7 @@ export function BookingCalendar({ bookings, onDateRangeSelect, onDoubleClickDate
   const getBookingsForDate = (date: Date) => {
     const dateStr = date.toISOString().split("T")[0]
 
-    return bookings.filter((booking) => {
+    const dateBookings = bookings.filter((booking) => {
       // For boarding (multi-day), check if the date falls within the booking period
       if (booking.serviceType === ServiceType.Boarding && booking.endDate) {
         const startDate = new Date(booking.startDate).toISOString().split("T")[0]
@@ -117,6 +143,22 @@ export function BookingCalendar({ bookings, onDateRangeSelect, onDoubleClickDate
 
       // For grooming (single day), just check if it's on the date
       return new Date(booking.startDate).toISOString().split("T")[0] === dateStr
+    })
+
+    // Sort bookings: boarding first, then by position for consistent display
+    return dateBookings.sort((a, b) => {
+      // Boarding bookings always come first
+      if (a.serviceType === ServiceType.Boarding && b.serviceType !== ServiceType.Boarding) {
+        return -1
+      }
+      if (a.serviceType !== ServiceType.Boarding && b.serviceType === ServiceType.Boarding) {
+        return 1
+      }
+
+      // Then sort by the position in the bookingPositions map for consistency
+      const posA = bookingPositions.get(a.id) || 0
+      const posB = bookingPositions.get(b.id) || 0
+      return posA - posB
     })
   }
 
@@ -189,7 +231,7 @@ export function BookingCalendar({ bookings, onDateRangeSelect, onDoubleClickDate
           {/* Show up to 3 bookings */}
           {dateBookings.slice(0, 3).map((booking, idx) => (
             <div
-              key={idx}
+              key={booking.id}
               className={`truncate px-1 py-0.5 text-white text-xs font-medium ${
                 booking.serviceType === ServiceType.Boarding ? "bg-green-500" : "bg-blue-500"
               }`}

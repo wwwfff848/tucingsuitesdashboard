@@ -6,11 +6,10 @@ import { BookingTable } from "./booking-table"
 import { BookingDialog } from "./booking-dialog"
 import type { Booking } from "@/lib/types"
 import { ServiceType } from "@/lib/types"
-import { useBookings } from "@/lib/use-bookings"
-import { TucingLogo } from "./logo"
+import { useBookingsDb } from "@/lib/use-bookings-db"
 
 export function Dashboard() {
-  const { bookings, addBooking, updateBooking, deleteBooking } = useBookings()
+  const { bookings, addBooking, updateBooking, deleteBooking, loading, error } = useBookingsDb()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
@@ -57,17 +56,17 @@ export function Dashboard() {
     setPreSelectedServiceType(null)
   }
 
-  const handleSaveBooking = (booking: Booking) => {
+  const handleSaveBooking = async (booking: Booking) => {
     if (editBooking) {
-      updateBooking(booking)
+      await updateBooking(booking)
     } else {
-      addBooking(booking)
+      await addBooking(booking)
     }
     handleCloseDialog()
   }
 
-  const handleDeleteBooking = (id: string) => {
-    deleteBooking(id)
+  const handleDeleteBooking = async (id: string) => {
+    await deleteBooking(id)
   }
 
   return (
@@ -75,23 +74,34 @@ export function Dashboard() {
       <header className="border-b bg-white shadow-sm">
         <div className="container flex h-16 items-center px-4">
           <div className="flex items-center gap-3">
-            <TucingLogo />
             <h1 className="text-2xl font-bold">Tucing Suites Calendar</h1>
           </div>
         </div>
       </header>
       <main className="container px-4 py-6 space-y-6">
-        <BookingCalendar
-          bookings={bookings}
-          onDateRangeSelect={handleDateRangeSelect}
-          onDoubleClickDate={handleDoubleClickDate}
-        />
-        <BookingTable
-          bookings={bookings}
-          onAddBooking={handleDateSelect}
-          onEditBooking={handleEditBooking}
-          onDeleteBooking={handleDeleteBooking}
-        />
+        {loading ? (
+          <div className="flex justify-center p-8">
+            <p>Loading bookings...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
+            <p>{error}</p>
+          </div>
+        ) : (
+          <>
+            <BookingCalendar
+              bookings={bookings}
+              onDateRangeSelect={handleDateRangeSelect}
+              onDoubleClickDate={handleDoubleClickDate}
+            />
+            <BookingTable
+              bookings={bookings}
+              onAddBooking={handleDateSelect}
+              onEditBooking={handleEditBooking}
+              onDeleteBooking={handleDeleteBooking}
+            />
+          </>
+        )}
       </main>
       <BookingDialog
         open={isDialogOpen}

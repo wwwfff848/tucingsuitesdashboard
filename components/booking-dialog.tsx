@@ -13,7 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { type Booking, ServiceType } from "@/lib/types"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Bath, Cat, User2, CalendarIcon } from "lucide-react"
+import { Bath, Cat, User2, CalendarIcon, Phone, DollarSign } from "lucide-react"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -42,6 +42,11 @@ const formSchema = z.object({
   startDate: z.date(),
   endDate: z.date().optional(),
   notes: z.string().optional(),
+  totalFees: z
+    .string()
+    .optional()
+    .transform((val) => (val ? Number.parseFloat(val) : undefined)),
+  contactNumber: z.string().optional(),
 })
 
 export function BookingDialog({
@@ -60,6 +65,8 @@ export function BookingDialog({
       catName: "",
       ownerName: "",
       notes: "",
+      totalFees: "",
+      contactNumber: "",
     },
   })
 
@@ -76,6 +83,8 @@ export function BookingDialog({
           startDate: new Date(booking.startDate),
           endDate: booking.endDate ? new Date(booking.endDate) : undefined,
           notes: booking.notes,
+          totalFees: booking.totalFees !== undefined ? booking.totalFees.toString() : "",
+          contactNumber: booking.contactNumber || "",
         })
       } else {
         // Create mode
@@ -86,6 +95,8 @@ export function BookingDialog({
           startDate: selectedDate || new Date(),
           endDate: endDate || undefined,
           notes: "",
+          totalFees: "",
+          contactNumber: "",
         })
       }
     }
@@ -103,6 +114,8 @@ export function BookingDialog({
       startDate: values.startDate.toISOString(),
       endDate: values.endDate?.toISOString(),
       notes: values.notes,
+      totalFees: values.totalFees,
+      contactNumber: values.contactNumber,
     })
   }
 
@@ -281,6 +294,42 @@ export function BookingDialog({
                   )}
                 />
               )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="contactNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Number (Optional)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input placeholder="+60 12 345 6789" {...field} className="pl-9" />
+                        <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="totalFees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Fees (RM) (Optional)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input placeholder="0.00" {...field} className="pl-9" type="number" step="0.01" min="0" />
+                        <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <FormField
